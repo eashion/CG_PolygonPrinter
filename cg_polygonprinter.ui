@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>CG_PolygonPrinterClass</class>
+ <widget class="QMainWindow" name="CG_PolygonPrinterClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>792</width>
+    <height>456</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>CG_PolygonPrinter</string>
+  </property>
+  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QStatusBar" name="statusBar"/>
+  <widget class="QToolBar" name="mainToolBar">
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>792</width>
+     <height>26</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>微软雅黑</family>
+     <weight>50</weight>
+     <bold>false</bold>
+    </font>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="geometry">
+     <rect>
+      <x>265</x>
+      <y>158</y>
+      <width>137</width>
+      <height>129</height>
+     </rect>
+    </property>
+    <property name="autoFillBackground">
+     <bool>false</bool>
+    </property>
+    <property name="title">
+     <string>绘图</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionHand"/>
+    <addaction name="separator"/>
+    <addaction name="actionFile"/>
+    <addaction name="separator"/>
+   </widget>
+   <widget class="QMenu" name="menu_2">
+    <property name="title">
+     <string>保存</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionTest"/>
+    <addaction name="separator"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_2"/>
+  </widget>
+  <action name="actionHand">
+   <property name="text">
+    <string>手动绘图</string>
+   </property>
+  </action>
+  <action name="actionFile">
+   <property name="text">
+    <string>文件输入</string>
+   </property>
+  </action>
+  <action name="actionTest">
+   <property name="text">
+    <string>文件保存</string>
+   </property>
+  </action>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources>
+  <include location="cg_polygonprinter.qrc"/>
+ </resources>
+ <connections/>
+</ui>
