@@ -3,8 +3,10 @@
 
 MyPainterWidget::MyPainterWidget(QWidget* parent)
      :QWidget(parent){
-	
-	YMAX= 0;
+
+
+	YMAX = 0;
+	YMIN = 1100;
 	edgeNum = 0;
 	pointNum = 0;
 	APNum = 0;
@@ -14,6 +16,7 @@ MyPainterWidget::MyPainterWidget(QWidget* parent)
 	qColor = Qt::red;
 	ifFinished = false;
 	ifFilling = false;
+	fillingType = 0;
 	YPos = new edge*[1100];
 	xPos = new int*[1100];
 	xLen = new int[1100];
@@ -37,13 +40,16 @@ MyPainterWidget::MyPainterWidget(QWidget* parent)
 MyPainterWidget::~MyPainterWidget(){
 	delete []pointArray;
 	delete []edgeTable;
+	delete []YPos;
+	delete []xPos;
+	delete []xLen;
 }
 
-
+//初始化变量及数组
 void MyPainterWidget::initial(){
 	
-	
 	YMAX= 0;
+	YMIN = 1100;
 	edgeNum = 0;
 	pointNum = 0;
 	APNum = 0;
@@ -74,22 +80,40 @@ void MyPainterWidget::paintEvent(QPaintEvent*p){
 		painter.drawLine(pointArray[i],pointArray[i+1]);
 	}
 
-	//封闭
+	//结束画图
 	if( ifFinished == true ){
 
+		//封闭
 		painter.drawLine(pointArray[pointNum-1],pointArray[0]);
 
-		for( int i = 0; i < APointY; i++ ){
+		int flag = 0;
+		//绘制
+		for( int i = YMIN; i <= YMAX; i++ ){
 			for( int j = 0; j < xLen[i]; j+=2 ){
-				staPoint.setX(xPos[i][j]);
-				staPoint.setY(i);
-				endPoint.setX(xPos[i][j+1]);
-				endPoint.setY(i);
-				painter.drawLine(staPoint,endPoint);
+				if( fillingType == 1 ){
+					if( (flag/20)%2 == 0 ){
+						staPoint.setX(xPos[i][j]);
+						staPoint.setY(i);
+						if( (i+20) >= YMAX ){
+							continue;
+						}
+						endPoint.setX(xPos[i+20][j+1]);
+						endPoint.setY(i+20);
+						painter.drawLine(staPoint,endPoint);
+					}
+					flag++;
+				}
+				else if( fillingType == 0 ){
+					staPoint.setX(xPos[i][j]);
+					staPoint.setY(i);
+					endPoint.setX(xPos[i][j+1]);
+					endPoint.setY(i);
+					painter.drawLine(staPoint,endPoint);
+				}
 			}
 		}
 
-		initial();
+		//initial();
 	
 	}
 
@@ -98,6 +122,10 @@ void MyPainterWidget::paintEvent(QPaintEvent*p){
 
 void MyPainterWidget::mousePressEvent(QMouseEvent *e){
 
+	//重新绘制后在鼠标左键点击后初始化
+	if( ifFinished == true ){
+		initial();
+	}
 	if(e->button()==Qt::LeftButton){
 
 		pointArray[pointNum] = e->pos();
@@ -115,9 +143,6 @@ void MyPainterWidget::mousePressEvent(QMouseEvent *e){
 		repaint();
 
 
-		//结束绘制
-		pointNum = 0;
-
 	}
 
 	checkPointArray();
@@ -125,14 +150,14 @@ void MyPainterWidget::mousePressEvent(QMouseEvent *e){
 	//改变鼠标形状
     //setCursor(Qt::PointingHandCursor);
 
-
 }
 
 void MyPainterWidget::mouseMoveEvent(QMouseEvent *e){
-	if( this->pointNum > 0 ){
+	if( pointNum>0 && ifFinished==false ){
 
 		pointArray[pointNum] = e->pos();
 		pointNum++;
+		checkPointArray();
 		
 		//绘制
 		//update();
@@ -161,6 +186,7 @@ void MyPainterWidget::buildEdgeTable(){
 
 	for( int i = 0; i < pointNum; i++ ){
 		YMAX = max(YMAX,pointArray[i].y());
+		YMIN = min(YMIN,pointArray[i].y());
 	}
 
 	edgeNum = pointNum;
@@ -187,17 +213,18 @@ void MyPainterWidget::buildEdgeTable(){
 			edgeTable[p1].x += edgeTable[p1].dx;
 			edgeTable[p2].x += edgeTable[p2].dx;
 			int yMin = y2+1;
+			edge* tmp = YPos[yMin];
 			if( YPos[yMin] != NULL ){
-				edge* tmp = YPos[yMin];
 				while( tmp->next!= NULL ){
 					tmp = tmp->next;
 				}
 				if( check[p1] == false ){
 					tmp->next = &edgeTable[p1];
+					tmp = tmp->next;
 					check[p1] = true;
 				}
 				if( check[p2] == false ){
-					edgeTable[p1].next = &edgeTable[p2];
+					tmp->next = &edgeTable[p2];
 					check[p2] = true;
 				}
 			}
@@ -363,7 +390,7 @@ edge MyPainterWidget::getEdge(QPoint staP,QPoint endP){
 
 void MyPainterWidget::scanning(){
 
-	for(int i = 0; i < YMAX+1; i++ ){
+	for(int i = YMIN; i < YMAX+1; i++ ){
 		
 		edge* tmp;
 		if( YPos[i] != NULL ){
@@ -379,7 +406,7 @@ void MyPainterWidget::scanning(){
 			}
 		}
 
-		//若AEL不为空便绘制
+		//若AEL不为空便取出坐标
 		if( AEL!=NULL ){
 			APNum = 0;
 			APointY = i;
@@ -387,7 +414,9 @@ void MyPainterWidget::scanning(){
 			xPos[i] = new int[maxEdgeNum];
 			//取出所有横坐标
 			while( tmp != NULL ){
-				xPos[i][APNum++] = tmp->x;
+				if( tmp->yMax >= i ){
+					xPos[i][APNum++] = tmp->x;
+				}
 				tmp = tmp->next;
 			}
 			xLen[i] = APNum;
@@ -398,7 +427,7 @@ void MyPainterWidget::scanning(){
 			//更新AEL
 			edge* p1;
 			edge* p2;
-			while( AEL!=NULL && AEL->yMax == i ){
+			while( AEL!=NULL && AEL->yMax <= i ){
 				AEL = AEL->next;
 			}
 			if( AEL != NULL ){
@@ -406,7 +435,7 @@ void MyPainterWidget::scanning(){
 				p1 = AEL;
 				p2 = AEL->next;
 				while( p2 != NULL ){
-					if( p2->yMax == i ){
+					if( p2->yMax <= i ){
 						p1->next = p2->next;
 					}
 					else{
@@ -424,7 +453,7 @@ void MyPainterWidget::scanning(){
 
 }
 
-
+//检查点集大小
 void MyPainterWidget::checkPointArray(){
 
 	if( pointNum+1 < maxPointNum )
@@ -438,7 +467,7 @@ void MyPainterWidget::checkPointArray(){
 	maxPointNum*=2;
 
 }
-
+//检查边集大小
 void MyPainterWidget::checkEdgeTable(){
 
 	if( edgeNum+1 < maxEdgeNum )
@@ -452,7 +481,7 @@ void MyPainterWidget::checkEdgeTable(){
 	maxEdgeNum*=2;
 
 }
-
+//排序算法
 void MyPainterWidget::bubbleSort(int len,int* xPos){
 
 	for( int i = 0; i < len; i++ ){
@@ -463,4 +492,132 @@ void MyPainterWidget::bubbleSort(int len,int* xPos){
 		}
 	}
 
+}
+
+//文件绘制多边形
+void MyPainterWidget::fileFilling(){
+	
+	QString path = QFileDialog::getOpenFileName(this,
+                                                tr("Open File"),
+                                                "./file",
+                                                tr("Text Files(*.txt)"));//"."表示程序运行目录
+    if(!path.isEmpty()) {
+        QFile file(path);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, tr("Read File"),
+                                 tr("Cannot open file:\n%1").arg(path));
+            return;
+        }
+        QTextStream in(&file);
+		QString str = in.readAll();
+
+		readPolygonFromFile(str);
+
+        file.close();
+    } else {
+        QMessageBox::warning(this, tr("Path"),
+                             tr("You did not select any file."));
+    }
+
+}
+
+//保存多边形信息到文件
+void MyPainterWidget::fileSave(){
+	
+	QString path = QFileDialog::getSaveFileName(this,
+                                                tr("Open File"),
+                                                "./file",
+                                                tr("Text Files(*.txt)"));
+    if(!path.isEmpty()) {
+        QFile file(path);
+        if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+            QMessageBox::warning(this, tr("Write File"),
+                                       tr("Cannot open file:\n%1").arg(path));
+            return;
+        }
+        QTextStream out(&file);
+		QString str;
+        str = savePolygonToFile();
+		out << str;
+        file.close();
+    } else {
+        QMessageBox::warning(this, tr("Path"),
+                             tr("You did not select any file."));
+    }
+
+}
+
+//从文件中读取多边形信息
+void MyPainterWidget::readPolygonFromFile(QString str){
+
+	int pos = 0;
+	//n
+	pointNum = str.section('\n',pos,pos).toInt();
+	pos++;
+	//type
+	fillingType = str.section('\n',pos,pos).toInt();
+	pos++;
+	//color
+	int r = str.section('\n',pos,pos).toInt();
+	pos++;
+	int g = str.section('\n',pos,pos).toInt();
+	pos++;
+	int b = str.section('\n',pos,pos).toInt();
+	pos++;
+	qColor.setRed(r);
+	qColor.setGreen(g);
+	qColor.setBlue(b);
+
+	QPoint qPoint;
+	for( int i = 0; i < pointNum; i++ ){
+		int x = str.section('\n',pos,pos).toInt();
+		pos++;
+		int y = str.section('\n',pos,pos).toInt();
+		pos++;
+		qPoint.setX(x);
+		qPoint.setY(y);
+		pointArray[i] = qPoint;
+		checkPointArray();
+	}
+	//绘制
+	ifFinished = true;
+	fillingPolygon();
+	repaint();
+}
+
+//读多边形信息到文件
+QString MyPainterWidget::savePolygonToFile(){
+
+	QString str = "";
+	str += intToStr(pointNum)+'\n';
+	str += intToStr(fillingType)+'\n';
+	str += intToStr(qColor.red())+'\n';
+	str += intToStr(qColor.green())+'\n';
+	str += intToStr(qColor.blue())+'\n';
+	for( int i = 0; i < pointNum; i++ ){
+	
+		str += intToStr(pointArray[i].x())+'\n';
+		str += intToStr(pointArray[i].y())+'\n';
+	
+	}
+	return str;
+
+}
+
+//int转str
+QString MyPainterWidget::intToStr(int tmp){
+	
+	QString str = QString::number(tmp);
+	return str;
+
+}
+
+//修改为完全填充模式
+void MyPainterWidget::changeToFullFilling(){
+	fillingType = 0;
+}
+
+//修改为阴影填充模式
+void MyPainterWidget::changeToShadowFilling(){
+	fillingType = 1;
 }
