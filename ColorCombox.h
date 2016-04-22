@@ -14,6 +14,9 @@ public:
 
     void setButtonIcon(const QString &imageFile, QColor color);
 
+	//Ö÷²Ëµ¥
+	QMenu* Pmenu;
+
 private:
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
     QIcon createColorToolButtonIcon(const QString &imageFile, QColor color);

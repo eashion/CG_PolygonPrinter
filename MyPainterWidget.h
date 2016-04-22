@@ -41,8 +41,6 @@ public:
 	void fillingPolygon();
 	//扫描
 	void scanning();
-	//画线
-	void drawLines(int x1,int x2,int y);
 	//检测pointNum是否越界
 	void checkPointArray();
 	//检测edgeNum是否越界
@@ -64,6 +62,8 @@ public:
 	//修改填充类型
 	void changeToFullFilling();
 	void changeToShadowFilling();
+	//修改颜色
+	void changeColor(QColor);
 	
 	int YMAX;						//存储点的最大值
 	int YMIN;						//存储点的最小值

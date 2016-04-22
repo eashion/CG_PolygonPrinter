@@ -35,6 +35,7 @@ MyPainterWidget::MyPainterWidget(QWidget* parent)
 
 	//打开鼠标跟踪
 	setMouseTracking(true);
+
 }
 
 MyPainterWidget::~MyPainterWidget(){
@@ -56,7 +57,6 @@ void MyPainterWidget::initial(){
 	APointY = 0;
 	maxPointNum = 100;
 	maxEdgeNum = 100;
-	qColor = Qt::red;
 	ifFinished = false;
 	ifFilling = false;
 
@@ -68,7 +68,7 @@ void MyPainterWidget::initial(){
 
 }
 
-
+//绘制函数
 void MyPainterWidget::paintEvent(QPaintEvent*p){
     QPainter painter(this);
     QPen pen;									//创建一个画笔
@@ -160,7 +160,6 @@ void MyPainterWidget::mouseMoveEvent(QMouseEvent *e){
 		checkPointArray();
 		
 		//绘制
-		//update();
 		repaint();
 
 
@@ -170,7 +169,7 @@ void MyPainterWidget::mouseMoveEvent(QMouseEvent *e){
     }
 }
 
-
+//填充
 void MyPainterWidget::fillingPolygon(){
 
 	//构造边集
@@ -179,7 +178,7 @@ void MyPainterWidget::fillingPolygon(){
 	scanning();
 
 }
-
+//初始化边集
 void MyPainterWidget::buildEdgeTable(){
 
 	bool* check = new bool[pointNum];
@@ -365,7 +364,7 @@ void MyPainterWidget::buildEdgeTable(){
 	}
 	delete []check;
 }
-
+//造边
 edge MyPainterWidget::getEdge(QPoint staP,QPoint endP){
 
 	if( staP.y() > endP.y() ){
@@ -387,7 +386,7 @@ edge MyPainterWidget::getEdge(QPoint staP,QPoint endP){
 	return tmp;
 
 }
-
+//初始化后扫描函数
 void MyPainterWidget::scanning(){
 
 	for(int i = YMIN; i < YMAX+1; i++ ){
@@ -452,7 +451,6 @@ void MyPainterWidget::scanning(){
 	}
 
 }
-
 //检查点集大小
 void MyPainterWidget::checkPointArray(){
 
@@ -620,4 +618,11 @@ void MyPainterWidget::changeToFullFilling(){
 //修改为阴影填充模式
 void MyPainterWidget::changeToShadowFilling(){
 	fillingType = 1;
+}
+
+//修改填充颜色
+void MyPainterWidget::changeColor(QColor qColor){
+	
+	this->qColor = qColor;
+
 }

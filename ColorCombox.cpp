@@ -33,7 +33,9 @@ ColorCombox::ColorCombox(QWidget *parent)
     : QToolButton(parent)
 {
     setPopupMode(QToolButton::MenuButtonPopup);
-    setMenu(createColorMenu(SLOT(OnColorChanged()), SLOT(OnShowColorBoard())));
+	Pmenu = createColorMenu(SLOT(OnColorChanged()), SLOT(OnShowColorBoard()));
+	//Pmenu->setTitle(QStringLiteral("&颜色列表"));
+    setMenu(Pmenu);
     setAutoFillBackground(true);
 }
 
@@ -52,16 +54,16 @@ QMenu *ColorCombox::createColorMenu(const char *slot, const char *slotColorBoard
     // 设置透明色
     QAction *pActionTransparent = new QAction(this);
     pActionTransparent->setData(QColor(0, 0, 0, 0));
-    pActionTransparent->setText(tr("transparent_set"));
+    pActionTransparent->setText(QStringLiteral("transparent_set"));
     connect(pActionTransparent, SIGNAL(triggered()), this, slot);
     QToolButton *pBtnTransparent = new QToolButton;
     pBtnTransparent->setFixedSize(QSize(142, 16));
-    pBtnTransparent->setText(tr("transparent_set"));
+    pBtnTransparent->setText(QStringLiteral("transparent_set"));
     pBtnTransparent->setDefaultAction(pActionTransparent);
 
     // 选择其他颜色
     QToolButton *pBtnOtherColor = new QToolButton;
-    pBtnOtherColor->setText(tr("other_color_set"));
+    pBtnOtherColor->setText(QStringLiteral("other_color_set"));
     pBtnOtherColor->setFixedSize(QSize(142, 20));
     pBtnOtherColor->setAutoRaise(true);
     pBtnOtherColor->setToolTip("other_color_set");

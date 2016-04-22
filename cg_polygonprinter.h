@@ -24,6 +24,7 @@ public:
 	//创建菜单栏类
 	QMenu* paintMenu;
 	QMenu* saveMenu;
+	QMenu* colorMenu;
 
 	//创建paint的下拉菜单
 	QAction* fullFillAction;
@@ -33,9 +34,13 @@ public:
 	//创建save的下拉菜单
 	QAction* fileSave;
 
+	//创建颜色下拉菜单
+	QAction* changeColor;
+
 	//构造函数
 	void createMenus();
 	void createActions(QWidget *parent = 0);
+	void showColorCombox();
 
 
 
